@@ -1,34 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StrictMode } from "react";
 import classes from "./AvailablePassword.module.css";
 import SinglePasswordItem from "./SinglePasswordItem";
-
-const DUMMY_PASSWORD = [
-  {
-    id: "p1",
-    website: "apple.com",
-    username: "user123",
-    password: "password123"
-  },
-  {
-    id: "p2",
-    website: "google.com",
-    username: "user123",
-    password: "password123"
-  },
-  {
-    id: "p3",
-    website: "microsoft.com",
-    username: "user123",
-    password: "password123"
-  },
-  {
-    id: "p4",
-    website: "x.com",
-    username: "user123",
-    password: "password123"
-  }
-];
 
 function DynamicFavicon({ website }) {
   const faviconUrl = `https://www.google.com/s2/favicons?sz=256&domain_url=${website}`;
@@ -38,18 +11,29 @@ function DynamicFavicon({ website }) {
 
 const AvailablePassword = (props) => {
   const [formIsShow, setFormIsShow] = useState(false);
+  const [passwordData, setPasswordData] = useState([]);
+  const [selectedPassword, setSelectedPassword] = useState(null);
 
-  const showFormHandler = () => {
+  useEffect(() => {
+    const storedUserDataJSON = localStorage.getItem("storedUserData");
+    if (storedUserDataJSON) {
+      const parsedUserData = JSON.parse(storedUserDataJSON);
+      setPasswordData(parsedUserData);
+    }
+  }, [formIsShow, props.formStatus]);
+
+  const showFormHandler = (password) => {
     setFormIsShow(true);
+    setSelectedPassword(password); // Store the selected password data in state
   };
 
   const hideFormHandler = () => {
     setFormIsShow(false);
   };
 
-  const passwordItem = DUMMY_PASSWORD.map((pass) => (
+  const passwordItem = passwordData.map((pass) => (
     <div
-      onClick={showFormHandler}
+      onClick={() => showFormHandler(pass)} // Pass the password data when clicked
       key={pass.id}
       className={classes.cardWrapper}
     >
@@ -70,8 +54,15 @@ const AvailablePassword = (props) => {
 
   return (
     <StrictMode>
-      <div className={classes.card}>{passwordItem}</div>
-      {formIsShow && <SinglePasswordItem onClose={hideFormHandler} />}
+      <div className={classes.card}>
+        {passwordItem.length ? passwordItem : "No Password Available"}
+      </div>
+      {formIsShow && (
+        <SinglePasswordItem
+          selectedPassword={selectedPassword}
+          onClose={hideFormHandler}
+        />
+      )}
     </StrictMode>
   );
 };
