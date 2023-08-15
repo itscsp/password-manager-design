@@ -1,0 +1,19 @@
+.inputWrapper {
+  position: relative;
+}
+
+.inputWrapper .actionbtn button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 5px 5px 1px 8px;
+  border-radius: 0;
+}
+
+.inputWrapper .actionbtn button:first-child {
+  right: 0 !important;
+}
+
+.inputWrapper .actionbtn button:last-child {
+  right: 37px;
+}

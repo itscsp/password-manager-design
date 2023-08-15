@@ -19,7 +19,7 @@ export default function App() {
     <div className="container">
       {formIsShow && <AddPassword onClose={hideFormHandler} />}
       <Header onClick={showFormHandler} />
-      <PasswordList />
+      <PasswordList formStatus={formIsShow} />
     </div>
   );
 }
