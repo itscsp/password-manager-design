@@ -2,6 +2,13 @@
   position: relative;
 }
 
+.inputWrapper {
+  background: #fff;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border-radius: 3px;
+}
+
 .inputWrapper .actionbtn button {
   position: absolute;
   right: 0;
