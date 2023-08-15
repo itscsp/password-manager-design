@@ -1,77 +1,84 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useReducer } from "react";
 import Input from "../UI/Input";
 import Model from "../UI/Model";
 import Textarea from "../UI/Textarea";
 import classes from "./SinglePasswordItem.module.css";
+import inputReducer from "../../inputReducer"; // Import the reducer
 
 const SinglePasswordItem = (props) => {
+  const initialState = {
+    inputURL: props.selectedPassword.website,
+    inputURLValid: true,
+    inputUserName: props.selectedPassword.username,
+    inputUserNameValid: true,
+    inputPassword: props.selectedPassword.password,
+    inputPasswordValid: true,
+    inputNote: props.selectedPassword.note,
+    inputNoteValid: false,
+    formValid: false,
+  };
+
   const id = props.selectedPassword.id;
   const [edit, setEdit] = useState(false);
-  const [inputURL, setInputURL] = useState(props.selectedPassword.website);
-  const [inputURLValid, setInputURLValid] = useState(true);
-  const [inputUserName, setInputUserName] = useState(
-    props.selectedPassword.username
-  );
-  const [inputUserNameValid, setInputUserNameValid] = useState(true);
-  const [inputPassword, setInputPassword] = useState(
-    props.selectedPassword.password
-  );
-  const [inputPasswordValid, setInputPasswordValid] = useState(true);
-  const [inputNote, setInputNote] = useState(props.selectedPassword.note);
-  const [inputNoteValid, setInputNoteValid] = useState();
+
+
+
   const [formValid, setFormValid] = useState(true);
   const [userData, setUserData] = useState([]);
+
+  const [inputState, dispatchInput] = useReducer(inputReducer, initialState);
 
   const urlChangeHandler = (event) => {
     const inputValue = event.target.value;
 
     // Modified URL pattern to allow inputs like "chethan.s@idaksh.in"
-    const urlPattern = /^(https?:\/\/(www\.)?)?[a-zA-Z0-9\-\.]+\.[a-z]{2,}(:[0-9]{1,5})?(\/.*)?$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{1,}$/;
+    const urlPattern =
+      /^(https?:\/\/(www\.)?)?[a-zA-Z0-9\-\.]+\.[a-z]{2,}(:[0-9]{1,5})?(\/.*)?$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}$/;
 
     // Test the input value against the new pattern
     const isValid = urlPattern.test(inputValue);
-    if (isValid) {
-      setInputURL(inputValue);
-      setInputURLValid(isValid);
-    } else {
-      setInputURL(inputValue);
-      setInputURLValid(isValid);
-    }
+    dispatchInput({ type: "URL", val: inputValue, isValid });
   };
 
   const usernameChangeHandler = (event) => {
     const inputValue = event.target.value;
 
     if (inputValue) {
-      setInputUserNameValid(true);
-      setInputUserName(inputValue);
+      dispatchInput({ type: "USERNAME", val: inputValue, isValid: true });
     } else {
-      setInputUserNameValid(false);
-      setInputUserName(inputValue);
+      dispatchInput({ type: "USERNAME", val: inputValue, isValid: false });
     }
   };
 
   const passwordChangeHandler = (event) => {
     const inputValue = event.target.value;
     if (inputValue) {
-      setInputPassword(inputValue);
-      setInputPasswordValid(true);
+      // setInputPassword(inputValue);
+      // setInputPasswordValid(true);
+      dispatchInput({ type: "PASSWORD", val: inputValue, isValid: true });
     } else {
-      setInputPassword(inputValue);
-      setInputPasswordValid(false);
+      // setInputPassword(inputValue);
+      // setInputPasswordValid(false);
+      dispatchInput({ type: "PASSWORD", val: inputValue, isValid: false });
     }
   };
 
   useEffect(() => {
-    if (inputURLValid && inputUserNameValid && inputPasswordValid) {
+    if (
+      inputState.inputURLValid &&
+      inputState.inputUserNameValid &&
+      inputState.inputPasswordValid
+    ) {
       setFormValid(false);
     } else {
       setFormValid(true);
     }
-  }, [inputURL, inputUserName, inputPassword]);
+  }, [inputState.inputURL, inputState.inputUserName, inputState.inputPassword]);
 
   const noteChangeHandler = (event) => {
-    setInputNote(event.target.value);
+    // setInputNote(event.target.value);
+    const inputValue = event.target.value;
+    dispatchInput({ type: "NOTE", val: inputValue, isValid: true });
   };
 
   let editedData = [];
@@ -93,10 +100,10 @@ const SinglePasswordItem = (props) => {
           // Update the properties of the object
           editedData = {
             id: id,
-            website: inputURL,
-            username: inputUserName,
-            password: inputPassword,
-            note: inputNote // Include note if needed
+            website: inputState.inputURL,
+            username: inputState.inputUserName,
+            password: inputState.inputPassword,
+            note: inputState.inputNote, // Include note if needed
           };
 
           userDataArray[indexToEdit] = editedData;
@@ -145,20 +152,20 @@ const SinglePasswordItem = (props) => {
             type="url"
             label="Site URL"
             placeholder="example.com"
-            siteInput={inputURL}
+            siteInput={inputState.inputURL}
             readOnly={edit}
             onChange={urlChangeHandler}
-            isValid={inputURLValid}
+            isValid={inputState.inputURLValid}
             className={classes.invalid}
           />
           <Input
             id="username"
             type="text"
             label="Username"
-            siteInput={inputUserName}
+            siteInput={inputState.inputUserName}
             readOnly={edit}
             onChange={usernameChangeHandler}
-            isValid={inputUserNameValid}
+            isValid={inputState.inputUserNameValid}
             className={classes.invalid}
           />
 
@@ -167,10 +174,10 @@ const SinglePasswordItem = (props) => {
             type="password"
             label="Password"
             placeholder="******"
-            siteInput={inputPassword}
+            siteInput={inputState.inputPassword}
             readOnly={edit}
-            value={inputPassword}
-            isValid={inputPasswordValid}
+            value={inputState.inputPassword}
+            isValid={inputState.inputPasswordValid}
             onChange={passwordChangeHandler}
             className={classes.invalid}
           />
@@ -178,22 +185,14 @@ const SinglePasswordItem = (props) => {
             id="note"
             label="Note"
             placeholder=""
-            siteInput={inputNote}
+            siteInput={inputState.inputNote}
             readOnly={edit}
             onChange={noteChangeHandler}
-            isValid={inputNoteValid}
+            isValid={inputState.inputNoteValid}
             className={classes.invalid}
           />
 
           <div className="flex justify-end gap-10">
-            <button
-              type="submit"
-              onClick={editButtonHandler}
-              disabled={formValid}
-            >
-              {!edit && "Edit"}
-              {edit && "Submit"}
-            </button>
             {!edit && (
               <button
                 onClick={deleteButtonHandler}
@@ -203,6 +202,15 @@ const SinglePasswordItem = (props) => {
                 Delete
               </button>
             )}
+            <button
+              type="submit"
+              onClick={editButtonHandler}
+              disabled={formValid}
+            >
+              {!edit && "Edit"}
+              {edit && "Submit"}
+            </button>
+
             <button onClick={props.onClose}>Close</button>
           </div>
         </form>

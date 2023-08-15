@@ -4,6 +4,7 @@
 
 .inputWrapper {
   background: #fff;
+  border: 1px solid #fff;
   overflow: hidden;
   margin-bottom: 10px;
   border-radius: 3px;
